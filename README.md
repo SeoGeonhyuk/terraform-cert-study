@@ -1,3 +1,4 @@
+## 1장
 ### 동일한 머신에서 다른 버전의 Terraform 사용하기
 - 도커 컨테이너를 통해 실행하기
 - 테라폼 바이너리 설치 파일의 이름을 변경하기
@@ -59,4 +60,42 @@ terraform init --upgrade
 Terraform Provider를 업그레이드 할 때는 최신 버전의 Terraform Provider가 이전 버전의 Terraform Provider와 달리 지원하지 않는 리소스가 있는지 잘 확인하고, Terraform 스크립트를 수정해야 한다. 그러지 않으면, 예러가 발생한다.
 
 다행히 terraform validate라는 명령어를 통해 미지원 리소스를 확인할 수 있기 때문에, 확인 후 수정하는 것이 바람직하다.
+
+
+## 2장
+Terraform Provider에 별칭을 추가하여, 동일한 Provider를 다른 Provider 처럼 쓸 수 있다.
+이러한 구성 방식은, 같은 Terraform Provider에 대해서 여러 구독을 취하고 있을 때 사용하면 효율적이다.
+
+```hcl
+provider "azurerm" {
+    subscription_id = "xxx"
+    alias = "sub1"
+    features {}
+}
+
+provider "azurerm" {
+    subscription_id = "xxx"
+    alias = "sub2"
+    features {}
+}
+
+resource "azurem_resource_group" "example1" {
+    provider = azurem.sub1
+    name = "rg-sub1"
+}
+
+resource "azurem_resource_group" "example2" {
+    provider = azurem.sub2
+    name = "rg-sub2"
+}
+```
+
+머신에서 값을 사용하고 스크립트에서는 감추고 싶다. variable 사용
+다른 사용자도 해당 값을 공유받고 싶다. locals 사용
+Terraform의 실행 결과 값을 출력 받고 싶다. Output 사용
+
+참조를 통해서 암시적 의존성 그래프 확보 가능
+직접적인 명시를 통해서 명시적 의존성 그래프 확보 가능(depends_on 사용) 하지만 암시적 의존성을 사용하는 것이 권장됨.
+
+terraform graph 명령어를 사용하면, 해당 Terraform으로 배포되는 리소스 간의 의존성을 그래프로 확인할 수 있다.
 
